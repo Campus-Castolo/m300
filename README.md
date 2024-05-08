@@ -7,9 +7,7 @@ DESCRIPTION OF REPOSITORY - DESCRIPTION OF MODULE
 
 ### [To Wiki]()
 
-### [To Projects]()
-
-### [To Documents]()
+### [To Files]()
 
 ---
 
