@@ -3,15 +3,15 @@ DESCRIPTION OF REPOSITORY - DESCRIPTION OF MODULE
 
 ---
 
-## Repository Navigation
+# Repository Navigation
 
-### [To Wiki]()
+## [To Wiki]()
 
-### [To Files]()
+## [To Files]()
 
 ---
 
-## Members - Participants - Contributers
+# Members - Participants - Contributers
 
 |         | Member 1                   | Member 2                   | Member 3                   |
 |---------|----------------------------|----------------------------|----------------------------|
