@@ -7,6 +7,6 @@ Integrate cross-platform services into a network
 
 ## [To Wiki](https://github.com/Campus-Castolo/m300/wiki/Home)
 
-## [To Weekly Log](https://github.com/Campus-Castolo/m300/wiki/weekly-home)
+## [To Weekly Log](https://github.com/Campus-Castolo/m300/wiki/weekly-logs)
 
 ## [To Files]()
