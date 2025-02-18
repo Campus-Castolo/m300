@@ -8,4 +8,5 @@
 
 ### [To Wiki](https://github.com/Campus-Castolo/m300/wiki/home)
 
-### [To Weekly Logs](https://github.com/Campus-Castolo/m3300/wiki/weekly-logs)
+### [To Weekly Logs](https://github.com/Campus-Castolo/m300/wiki/weekly-logs)
+
