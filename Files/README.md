@@ -4,22 +4,8 @@
 
 ## Repository Navigation
 
-### [To Main]()
+### [To Main](https://github.com/Campus-Castolo/m300)
 
-### [To Wiki]()
+### [To Wiki](https://github.com/Campus-Castolo/m300/wiki/home)
 
----
-
-## CODE FILES IF NECESSARY
-
-### [CODE-FILE]()
-
-### [CODE-FILE]()
-
----
-
-## ADDITIONAL DOCUMENTS
-
-### [ADD-DOC-FILE]()
-
-### [ADD-DOC-FILE]()
+### [To Weekly Logs](https://github.com/Campus-Castolo/m3300/wiki/weekly-logs)
