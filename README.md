@@ -1,5 +1,5 @@
-# template-repository
-DESCRIPTION OF REPOSITORY - DESCRIPTION OF MODULE
+# M300
+Integrate cross-platform services into a network
 
 ---
 
