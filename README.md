@@ -7,6 +7,8 @@ Integrate cross-platform services into a network
 
 ## [To Wiki]()
 
+## [To Weekly Log]()
+
 ## [To Files]()
 
 ---
