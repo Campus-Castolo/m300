@@ -8,3 +8,5 @@
 | 5  | Integrating Various Services and Platforms | Can integrate simple services and platforms. | Effectively integrates various services and platforms. | Develops complex integration scenarios with optimal performance. |
 | 6  | Error Analysis and Logging | Identifies and documents basic errors. | Analyzes and systematically logs complex errors. | Conducts in-depth analyses and develops innovative solution strategies. |
 | 7  | Documentation of the Overall System | Creates simple documentation based on guidelines. | Creates detailed and clear documentation. | Develops comprehensive and intuitively understandable documentation. |
+
+<h6>based on https://gitlab.com/ch-tbz-it/Stud/m300/m300-bivo2021/-/blob/main/Kompetenzmatrix.md</h6>
