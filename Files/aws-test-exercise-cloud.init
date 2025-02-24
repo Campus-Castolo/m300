@@ -1,0 +1,11 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+packages:
+  - apache2
+
+runcmd:
+  - systemctl start apache2
+  - systemctl enable apache2
+  - echo "<html><head><title>Custom Web Page</title></head><body><h1>Welcome to My EC2 Web Server</h1><p>This is a custom web page running on an AWS EC2 instance.</p></body></html>" > /var/www/html/index.html
+  - systemctl restart apache2
