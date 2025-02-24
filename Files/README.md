@@ -1,5 +1,6 @@
 # Files relevant to PROJECT OR MODULE
-- [AWS test exercise](d)
+- [AWS test exercise](./aws-test-exercise-cloud.conf)
+cloud init file for the test exercise mentioned in week 1 journal
 
 ---
 
