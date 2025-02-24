@@ -1,4 +1,5 @@
 # Files relevant to PROJECT OR MODULE
+- [AWS test exercise](d)
 
 ---
 
