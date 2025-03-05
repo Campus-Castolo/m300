@@ -3,7 +3,6 @@
 #
 # PLEASE DO NOT EDIT IT DIRECTLY.
 #
-
 FROM php:8.3-fpm-alpine
 
 # persistent dependencies
