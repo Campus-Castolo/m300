@@ -1,0 +1,38 @@
+{
+	"version": 2,
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"title": "RobotoSerif",
+	"slug": "typography-2",
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Roboto Serif",
+							"fontStretch": "normal",
+							"fontStyle": "normal",
+							"fontWeight": "700",
+							"src": [
+								"file:./assets/fonts/robotoserif/RobotoSerif-Bold.ttf"
+							]
+						},						
+						{
+							"fontFamily": "Roboto Serif",
+							"fontStretch": "normal",
+							"fontStyle": "normal",
+							"fontWeight": "400",
+							"src": [
+								"file:./assets/fonts/robotoserif/RobotoSerif-Regular.ttf"
+							]
+						}
+						
+					],
+					"fontFamily": "\"Roboto Serif\", sans-serif",
+					"name": "Roboto Serif",
+					"slug": "body"
+				}			
+			]
+		}
+	}
+}

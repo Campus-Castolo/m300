@@ -1,0 +1,52 @@
+# Copyright (C) 2024 Themegrove
+# This file is distributed under the GNU General Public License v3 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: DigitalGrove 1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/digitalgrove\n"
+"POT-Creation-Date: 2024-11-18 15:25:45+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2024-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: functions.php:32
+msgid "DigitalGrove"
+msgstr ""
+
+#: patterns/archive-product.php:55
+msgid "No products were found matching your selection."
+msgstr ""
+
+#: patterns/sidebar.php:15
+msgid "Latest Posts"
+msgstr ""
+
+#: patterns/sidebar.php:23
+msgid "Categories"
+msgstr ""
+
+#: patterns/sidebar.php:31
+msgid "Tags"
+msgstr ""
+#. Theme Name of the plugin/theme
+msgid "DigitalGrove"
+msgstr ""
+
+#. Theme URI of the plugin/theme
+msgid "https://themegrove.com/products/digitalgrove/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "DigitalGrove is a premium full-site editing theme designed for businesses, consulting firms, law practices, and educational institutions. It combines modern design with advanced functionality, enabling effortless customization of every website element. With seamless integrations like WooCommerce for e-commerce, WPML for multilingual support, and Contact Form 7 for efficient communication, DigitalGrove provides everything you need to create a polished and professional online presence. Whether you're building a consultancy, legal practice, or educational platform, its flexible templates and built-in SEO optimization ensure your site stands out and drives results. Demo: https://demos.themegrove.com/digitalgrove/"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Themegrove"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://themegrove.com/"
+msgstr ""
