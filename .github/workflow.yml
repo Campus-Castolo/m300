@@ -1,0 +1,67 @@
+name: Build and Push Docker to ECR
+
+inputs:
+  path_to_dockerfile:
+    description: Path to the Dockerfile (default = 'wp-build/Dockerfile')
+    default: "wp-build/Dockerfile"  # Updated default path to match your Dockerfile location
+    type: string
+  docker_build_dir:
+    description: Docker build directory (default = '.')
+    default: "wp-build"  # Assuming 'wp-build' is the directory for Docker build context
+    type: string
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up AWS credentials from GitHub Secrets and log in to ECR
+      - name: AWS Login to ECR
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}              # AWS region from secrets
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} # AWS access key from secrets
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # AWS secret key from secrets
+        run: |
+          echo "Logging in to ECR..."
+          aws ecr get-login-password --region $AWS_REGION \
+            | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      # 3. Determine and bump the version using the versioning script
+      - name: Determine new version
+        id: version
+        run: ./.github/scripts/update_version.sh
+        # The script will output 'new_version' via GitHub Actions output
+
+      # 4. Build the Docker image with two tags: 'latest' and the new version
+      - name: Build Docker image
+        run: |
+          VERSION=${{ steps.version.outputs.new_version }}
+          DOCKERFILE_PATH="${{ github.event.head_commit.message }}"
+          # Use the path_to_dockerfile input provided by the user, defaulting to 'wp-build/Dockerfile'
+          DOCKERFILE_PATH=${DOCKERFILE_PATH:-"${{ inputs.path_to_dockerfile }}"}
+
+          DOCKER_BUILD_DIR="${{ inputs.docker_build_dir }}"  # Directory for Docker build, default is 'wp-build'
+
+          echo "Building Docker image with tags '$VERSION' and 'latest' using Dockerfile at '$DOCKERFILE_PATH'..."
+          docker build "$DOCKER_BUILD_DIR" -f "$DOCKERFILE_PATH" -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$VERSION \
+                       -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest .
+
+      # 5. Push Docker image to ECR
+      - name: Push Docker image to ECR
+        run: |
+          VERSION=${{ steps.version.outputs.new_version }}
+          echo "Pushing Docker image tags '$VERSION' and 'latest' to ECR..."
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$VERSION
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
