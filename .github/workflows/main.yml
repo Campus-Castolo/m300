@@ -36,7 +36,7 @@ jobs:
       - name: Build, Tag, and Push Docker Image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: m300-project
+          ECR_REPOSITORY: m300/m300-project
           IMAGE_TAG: ${{ steps.version-tag.outputs.tag }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f .wp-build/Dockerfile .
