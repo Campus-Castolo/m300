@@ -4,6 +4,8 @@ FROM wordpress:latest
 # Example: Copy custom plugins or themes (adjust paths as needed)
 COPY ./plugins /var/www/html/wp-content/plugins/
 COPY ./themes /var/www/html/wp-content/themes/
+COPY wp-setup.sh /docker-entrypoint-initwp.d/
+
 
 # Example: Set recommended PHP settings (optional)
 RUN echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/uploads.ini \
