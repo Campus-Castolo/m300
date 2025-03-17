@@ -1,4 +1,4 @@
-name: Build and Push WP Image to ECR
+name: Build and Push WP Image to ECR with Semantic Tagging
 
 on:
   push:
@@ -10,34 +10,52 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
     steps:
+
       - name: Checkout Repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Configure AWS credentials
+      - name: Determine Version Increment
+        id: versioning
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          if [[ "$COMMIT_MSG" =~ \[M\] ]]; then
+            echo "increment=major" >> $GITHUB_OUTPUT
+          elif [[ "$COMMIT_MSG" =~ \[m\] ]]; then
+            echo "increment=minor" >> $GITHUB_OUTPUT
+          elif [[ "$COMMIT_MSG" =~ \[p\] ]]; then
+            echo "increment=patch" >> $GITHUB_OUTPUT
+          else
+            echo "No valid tag [M|m|p] found in commit message. Exiting."
+            exit 1
+          fi
+
+      - name: Increment Git Version
+        id: increment-version
+        run: |
+          chmod +x ./helper_script/git_update.sh
+          NEW_VERSION=$(./helper_script/git_update.sh ${{ steps.versioning.outputs.increment }})
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}  # Add this line!
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Tag Version (Manual/Simple Tagging)
-        id: version-tag
-        run: |
-          echo "1.0.${GITHUB_RUN_NUMBER}" > VERSION
-          echo "tag=1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
-
       - name: Build, Tag, and Push Docker Image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: m300/m300-project  # <-- Corrected
-          IMAGE_TAG: ${{ steps.version-tag.outputs.tag }}
+          ECR_REPOSITORY: m300/m300-project
+          IMAGE_TAG: ${{ steps.increment-version.outputs.new_version }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f .wp-build/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
@@ -45,8 +63,16 @@ jobs:
       - name: Push Latest Tag
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: m300/m300-project  # <-- Corrected
-          IMAGE_TAG: ${{ steps.version-tag.outputs.tag }}
+          ECR_REPOSITORY: m300/m300-project
+          IMAGE_TAG: ${{ steps.increment-version.outputs.new_version }}
         run: |
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      - name: Commit Updated Version
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add VERSION
+          git commit -m "Bump version to ${{ steps.increment-version.outputs.new_version }}"
+          git push origin main
