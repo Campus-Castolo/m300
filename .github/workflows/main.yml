@@ -1,5 +1,5 @@
 ---
-name: Build and Push Golang Image to AWS ECR
+name: Build and Push WP Image to ECR
 on:
   push:
     branches: [ main ]
