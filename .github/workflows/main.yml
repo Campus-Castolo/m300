@@ -9,14 +9,13 @@ permissions:
 
 jobs:
   build-and-push:
-    name: Build and Push to ECR
     runs-on: ubuntu-latest
-    steps:
 
-      - name: Checkout
+    steps:
+      - name: Checkout Repo
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -27,45 +26,22 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Automatic Dynamic Semantic Tagging
-        id: increment-git-tag
+      - name: Tag Version (Manual/Simple Tagging)
+        id: version-tag
         run: |
-          chmod +x ./helper_script/git_update.sh
-          if git log -1 --pretty=%B | grep -q "\\[M\\]"; then
-            VER="major"
-          elif git log -1 --pretty=%B | grep -q "\\[m\\]"; then
-            VER="minor"
-          elif git log -1 --pretty=%B | grep -q "\\[p\\]"; then
-            VER="patch"
-          else
-            echo "Commit message must contain [M], [m], or [p]. Exiting."
-            exit 1
-          fi
-          NEW_TAG=$(bash ./helper_script/git_update.sh -v $VER)
-          echo "git-tag=$NEW_TAG" >> $GITHUB_OUTPUT
-
+          echo "1.0.${GITHUB_RUN_NUMBER}" > VERSION
+          echo "tag=1.0.${GITHUB_RUN_NUMBER}" >> $GITHUB_OUTPUT
 
       - name: Build, Tag, and Push Docker Image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: m300-project
-          IMAGE_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+          IMAGE_TAG: ${{ steps.version-tag.outputs.tag }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f .wp-build/Dockerfile .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Push latest tag
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: m300-project
+      - name: Push Latest Tag
         run: |
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-      - name: Commit updated Tag
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
-          git add .
-          git commit -m "Update Version Tag to ${{ steps.increment-git-tag.outputs.git-tag }}"
-          git push origin main
