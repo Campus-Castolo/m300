@@ -15,7 +15,7 @@ RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli
     mv wp-cli.phar /usr/local/bin/wp
 
 # Copy helper script to pre-activate plugins (Ensure wp-setup.sh exists!)
-COPY wp-setup.sh /docker-entrypoint-initwp.d/
+COPY .wp-build/wp-setup.sh /docker-entrypoint-initwp.d/
 
 # Ensure script has execution permissions
 RUN chmod +x /docker-entrypoint-initwp.d/wp-setup.sh
