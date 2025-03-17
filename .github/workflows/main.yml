@@ -1,57 +1,38 @@
-name: Build and Push Docker to ECR
-
+---
+name: Build and Push Golang Image to AWS ECR
 on:
   push:
-    branches:
-      - main
-
+    branches: [ main ]
 jobs:
   build-and-push:
+    name: Build and Push to ECR
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-
     steps:
-      # 1. Checkout the repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      # 2. Set up AWS credentials from GitHub Secrets and log in to ECR
-      - name: AWS Login to ECR
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}              # AWS region from secrets
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} # AWS access key from secrets
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} # AWS secret key from secrets
-        run: |
-          echo "Logging in to ECR..."
-          aws ecr get-login-password --region $AWS_REGION \
-            | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
 
-      # 3. Determine and bump the version using the versioning script
-      - name: Determine new version
-        id: version
-        run: ./.github/scripts/update_version.sh
-        # The script will output 'new_version' via GitHub Actions output
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
 
-      # 4. Build the Docker image with two tags: 'latest' and the new version
-      - name: Build Docker image
-        run: |
-          VERSION=${{ steps.version.outputs.new_version }}
-          DOCKERFILE_PATH="${{ github.event.head_commit.message }}"
-          # Use the path_to_dockerfile input provided by the user, defaulting to './wp-build/Dockerfile'
-          DOCKERFILE_PATH=${DOCKERFILE_PATH:-"${{ inputs.path_to_dockerfile }}"}
+    - name: Automatic Tagging of Releases
+      id: increment-git-tag
+      run: |
+        bash ./helper_script/git_update.sh -v major
 
-          DOCKER_BUILD_DIR="${{ inputs.docker_build_dir }}"  # Directory for Docker build, default is 'wp-build'
-
-          echo "Building Docker image with tags '$VERSION' and 'latest' using Dockerfile at '$DOCKERFILE_PATH'..."
-          docker build "$DOCKER_BUILD_DIR" -f "$DOCKERFILE_PATH" -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$VERSION \
-                       -t ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest .
-
-      # 5. Push Docker image to ECR
-      - name: Push Docker image to ECR
-        run: |
-          VERSION=${{ steps.version.outputs.new_version }}
-          echo "Pushing Docker image tags '$VERSION' and 'latest' to ECR..."
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:$VERSION
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/${{ secrets.ECR_REPOSITORY }}:latest
+    - name: Build, Tag, and Push the Image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_REPOSITORY: lesson-086
+        IMAGE_TAG: ${{ steps.increment-git-tag.outputs.git-tag }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
