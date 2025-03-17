@@ -2,8 +2,8 @@
 FROM wordpress:latest
 
 # Copy custom plugins/themes (Ensure these folders exist!)
-COPY plugins/ /var/www/html/wp-content/plugins/
-COPY themes/ /var/www/html/wp-content/themes/
+COPY .wp-build/plugins/ /var/www/html/wp-content/plugins/
+COPY .wp-build/themes/ /var/www/html/wp-content/themes/
 
 # Set recommended PHP settings (optional)
 RUN echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/uploads.ini \
