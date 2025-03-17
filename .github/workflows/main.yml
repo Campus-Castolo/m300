@@ -63,7 +63,7 @@ jobs:
       - name: Push Latest Tag
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: m300/m300-project
+          ECR_REPOSITORY: m300/m300
           IMAGE_TAG: ${{ steps.increment-version.outputs.new_version }}
         run: |
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
