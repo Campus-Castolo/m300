@@ -1,15 +1,5 @@
 name: Build and Push Docker to ECR
 
-inputs:
-  path_to_dockerfile:
-    description: Path to the Dockerfile (default = 'wp-build/Dockerfile')
-    default: "wp-build/Dockerfile"  # Updated default path to match your Dockerfile location
-    type: string
-  docker_build_dir:
-    description: Docker build directory (default = '.')
-    default: "wp-build"  # Assuming 'wp-build' is the directory for Docker build context
-    type: string
-
 on:
   push:
     branches:
@@ -49,7 +39,7 @@ jobs:
         run: |
           VERSION=${{ steps.version.outputs.new_version }}
           DOCKERFILE_PATH="${{ github.event.head_commit.message }}"
-          # Use the path_to_dockerfile input provided by the user, defaulting to 'wp-build/Dockerfile'
+          # Use the path_to_dockerfile input provided by the user, defaulting to './wp-build/Dockerfile'
           DOCKERFILE_PATH=${DOCKERFILE_PATH:-"${{ inputs.path_to_dockerfile }}"}
 
           DOCKER_BUILD_DIR="${{ inputs.docker_build_dir }}"  # Directory for Docker build, default is 'wp-build'
