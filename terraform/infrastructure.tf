@@ -1,15 +1,22 @@
 provider "aws" {
-  region = "us-east-1"
+  region     = "us-east-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+  token      = var.aws_session_token
 }
 
-# Create a VPC
+variable "aws_access_key" {}
+variable "aws_secret_key" {}
+variable "aws_session_token" {}
+
+# ✅ VPC
 resource "aws_vpc" "main_vpc" {
-  cidr_block = "10.0.0.0/16"
-  enable_dns_support = true
+  cidr_block           = "10.0.0.0/16"
+  enable_dns_support   = true
   enable_dns_hostnames = true
 }
 
-# Create Public Subnets
+# ✅ Subnets
 resource "aws_subnet" "public_1" {
   vpc_id                  = aws_vpc.main_vpc.id
   cidr_block              = "10.0.1.0/24"
@@ -24,7 +31,6 @@ resource "aws_subnet" "public_2" {
   map_public_ip_on_launch = true
 }
 
-# Create Private Subnets
 resource "aws_subnet" "private_1" {
   vpc_id            = aws_vpc.main_vpc.id
   cidr_block        = "10.0.3.0/24"
@@ -37,12 +43,11 @@ resource "aws_subnet" "private_2" {
   availability_zone = "us-east-1b"
 }
 
-# Internet Gateway for Public Subnets
+# ✅ Internet Gateway & Routing
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main_vpc.id
 }
 
-# Route Table for Public Subnets
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main_vpc.id
 
@@ -62,7 +67,7 @@ resource "aws_route_table_association" "public_2" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-# NAT Gateway for Private Subnets
+# ✅ NAT Gateway for Private Subnets
 resource "aws_eip" "nat" {}
 
 resource "aws_nat_gateway" "nat_gw" {
@@ -89,7 +94,7 @@ resource "aws_route_table_association" "private_2" {
   route_table_id = aws_route_table.private_rt.id
 }
 
-# Security Groups
+# ✅ Security Groups
 resource "aws_security_group" "ecs_sg" {
   vpc_id = aws_vpc.main_vpc.id
 
@@ -112,11 +117,17 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-# ECS Cluster
+# ✅ ECS Cluster
 resource "aws_ecs_cluster" "wp_cluster" {
   name = "wp-cluster"
 }
 
+# ✅ Fix: Use Existing ECR Repository
+data "aws_ecr_repository" "wp_repo" {
+  name = "m300/m300"
+}
+
+# ✅ ECS Task Definition
 resource "aws_ecs_task_definition" "wp_task" {
   family                   = "wp-task"
   requires_compatibilities = ["FARGATE"]
@@ -127,7 +138,7 @@ resource "aws_ecs_task_definition" "wp_task" {
   container_definitions = jsonencode([
     {
       name  = "wordpress"
-      image = "${aws_ecr_repository.wp_repo.repository_url}:latest"
+      image = "${data.aws_ecr_repository.wp_repo.repository_url}:latest"
       cpu   = 256
       memory = 512
       essential = true
@@ -141,6 +152,7 @@ resource "aws_ecs_task_definition" "wp_task" {
   ])
 }
 
+# ✅ ECS Service
 resource "aws_ecs_service" "wp_service" {
   name            = "wp-service"
   cluster         = aws_ecs_cluster.wp_cluster.id
@@ -154,32 +166,39 @@ resource "aws_ecs_service" "wp_service" {
   }
 }
 
-# RDS MySQL
-resource "aws_db_instance" "rds_primary" {
-  allocated_storage    = 20
-  engine              = "mysql"
-  engine_version      = "8.0"
-  instance_class      = "db.t3.micro"
-  username           = "admin"
-  password           = "password123"
-  db_subnet_group_name = aws_db_subnet_group.rds_subnet_group.name
-  publicly_accessible = false
-  backup_retention_period = 7
-  storage_encrypted = true
-  monitoring_interval = 60
+# ✅ RDS Subnet Group
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "rds-subnet-group"
+  subnet_ids = [aws_subnet.private_1.id, aws_subnet.private_2.id]
 }
 
+# ✅ Primary RDS Instance
+resource "aws_db_instance" "rds_primary" {
+  allocated_storage       = 20
+  engine                 = "mysql"
+  engine_version         = "8.0"
+  instance_class         = "db.t3.micro"
+  username              = "admin"
+  password              = "password123"
+  db_subnet_group_name  = aws_db_subnet_group.rds_subnet_group.name
+  publicly_accessible    = false
+  storage_encrypted      = true
+  skip_final_snapshot    = true  # Fix IAM restriction on backups
+}
+
+# ✅ RDS Read Replica
 resource "aws_db_instance" "rds_replica" {
   replicate_source_db = aws_db_instance.rds_primary.id
   instance_class      = "db.t3.micro"
   publicly_accessible = false
 }
 
-# CloudWatch Monitoring
+# ✅ CloudWatch Monitoring
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name = "/ecs/wp-cluster"
 }
 
+# ✅ CloudWatch Alarm for RDS CPU Utilization
 resource "aws_cloudwatch_metric_alarm" "rds_cpu_alarm" {
   alarm_name          = "rds-high-cpu"
   comparison_operator = "GreaterThanThreshold"
@@ -192,22 +211,15 @@ resource "aws_cloudwatch_metric_alarm" "rds_cpu_alarm" {
   alarm_description = "This alarm monitors high CPU utilization on the MySQL RDS"
 }
 
-# S3 Backup for RDS
-resource "aws_s3_bucket" "rds_backup" {
-  bucket = "my-rds-backup-bucket"
+# ✅ Outputs
+output "ecs_cluster_name" {
+  value = aws_ecs_cluster.wp_cluster.name
 }
 
-resource "aws_s3_bucket_policy" "rds_backup_policy" {
-  bucket = aws_s3_bucket.rds_backup.id
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = {
-        Service = "rds.amazonaws.com"
-      },
-      Action = "s3:PutObject",
-      Resource = "${aws_s3_bucket.rds_backup.arn}/*"
-    }]
-  })
+output "rds_primary_endpoint" {
+  value = aws_db_instance.rds_primary.endpoint
+}
+
+output "vpc_id" {
+  value = aws_vpc.main_vpc.id
 }
