@@ -90,7 +90,14 @@ jobs:
         run: |
           git config --global user.name 'github-actions'
           git config --global user.email 'github-actions@github.com'
-          git pull --rebase origin main
+          
+          # Stage and commit the VERSION bump
           git add VERSION
           git commit -m "Bump version to ${{ steps.increment-version.outputs.new_version }}"
+
+          # Rebase onto remote changes before pushing
+          git pull --rebase origin main || true
+          
+          # Finally push the updated branch
           git push origin main
+
