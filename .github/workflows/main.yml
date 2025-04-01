@@ -47,6 +47,23 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
           aws-region: us-east-1
 
+      - name: Check or Create ECR Repository
+        id: ensure-ecr
+        run: |
+          REPO_NAME="m300"
+          set -e
+
+          EXISTS=$(aws ecr describe-repositories --repository-names "$REPO_NAME" 2>&1 || true)
+
+          if echo "$EXISTS" | grep -q "RepositoryNotFoundException"; then
+            echo "ECR repository $REPO_NAME does not exist. Creating..."
+            aws ecr create-repository --repository-name "$REPO_NAME"
+            echo "created=true" >> $GITHUB_OUTPUT
+          else
+            echo "ECR repository $REPO_NAME already exists."
+            echo "created=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
