@@ -43,3 +43,8 @@ resource "aws_lb_listener" "ecs_listener" {
     target_group_arn = aws_lb_target_group.ecs_tg.arn
   }
 }
+
+output "alb_dns_name" {
+  description = "Public DNS name of the Application Load Balancer"
+  value       = aws_lb.ecs_alb.dns_name
+}
