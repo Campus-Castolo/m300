@@ -45,6 +45,6 @@ resource "aws_lb_listener" "ecs_listener" {
 }
 
 output "alb_dns_name" {
-  description = "Public DNS name of the Application Load Balancer"
+  description = "Public DNS name of the Application Load Balancer."
   value       = aws_lb.ecs_alb.dns_name
 }
