@@ -1,4 +1,4 @@
-# ECS WordPress EC2 Security Group
+# ECS WordPress Fargate Security Group
 resource "aws_security_group" "security_group-ecs-wordpress" {
   name        = "security-group-ecs-wordpress"
   description = "Allow HTTP traffic to ECS WordPress containers"
@@ -25,10 +25,10 @@ resource "aws_security_group" "security_group-ecs-wordpress" {
   }
 }
 
-# RDS Database Security Group
+# RDS MySQL Security Group
 resource "aws_security_group" "security_group-db" {
   name        = "security-group-db"
-  description = "Allow internal access to RDS from ECS"
+  description = "Allow internal access to RDS from ECS and replication"
   vpc_id      = aws_vpc.m300_vpc.id
 
   egress {
@@ -42,9 +42,20 @@ resource "aws_security_group" "security_group-db" {
   tags = {
     Name = "RDS DB SG"
   }
+
+  # Prevent premature destroy until RDS is gone
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
+
+  # Make SG deletion wait until both DBs are destroyed
+  # depends_on = [
+  #   aws_db_instance.wordpress_db_1,
+  #   aws_db_instance.wordpress_db_2
+  # ]
 }
 
-# ECS → DB access rule (isolated to avoid circular dependency)
+# Allow ECS → RDS (MySQL 3306)
 resource "aws_security_group_rule" "ecs_to_db" {
   type                     = "ingress"
   from_port               = 3306
@@ -55,7 +66,18 @@ resource "aws_security_group_rule" "ecs_to_db" {
   description              = "Allow MySQL from ECS to RDS"
 }
 
-# Load Balancer Security Group
+# Allow RDS → RDS Replication (DB1 to DB2)
+resource "aws_security_group_rule" "db1_to_db2_replication" {
+  type                     = "ingress"
+  from_port                = 3306
+  to_port                  = 3306
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.security_group-db.id
+  security_group_id        = aws_security_group.security_group-db.id
+  description              = "Allow RDS DB1 to replicate to DB2"
+}
+
+# ALB Security Group
 resource "aws_security_group" "security_group-alb" {
   name        = "security-group-alb"
   description = "Allow public HTTP to ALB"

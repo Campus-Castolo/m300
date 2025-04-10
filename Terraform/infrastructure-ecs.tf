@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "wordpress_task" {
         },
         {
           name  = "WORDPRESS_DB_NAME"
-          value = "wordpressdb1"
+          value = "var.db_username"
         }
       ],
       log_configuration = {
@@ -63,11 +63,12 @@ resource "aws_ecs_service" "wordpress_service" {
   launch_type     = "FARGATE"
   health_check_grace_period_seconds = 60
 
-  network_configuration {
-    subnets         = [aws_subnet.public_1.id, aws_subnet.public_2.id]
-    security_groups = [aws_security_group.security_group-ecs-wordpress.id]
-    assign_public_ip = true
-  }
+network_configuration {
+  subnets         = [aws_subnet.public_1.id, aws_subnet.public_2.id]
+  security_groups = [aws_security_group.security_group-ecs-wordpress.id]
+  assign_public_ip = true
+}
+
 
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_tg.arn
