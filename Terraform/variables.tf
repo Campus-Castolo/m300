@@ -13,11 +13,6 @@ variable "aws_secret_key" {
   description = "AWS secret key"
 }
 
-variable "aws_session_token" {
-  type        = string
-  description = "AWS session token (for temporary credentials)"
-}
-
 variable "db_password" {
   type        = string
   description = "Password for the RDS database"

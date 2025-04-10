@@ -10,8 +10,8 @@ resource "aws_ecs_task_definition" "wordpress_task" {
   network_mode             = "awsvpc"
   cpu                      = "512"
   memory                   = "1024"
-  execution_role_arn       = "arn:aws:iam::880731812020:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
-  task_role_arn            = "arn:aws:iam::880731812020:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS"
+  execution_role_arn       = "arn:aws:iam::972364552982:role/Administrator"
+  task_role_arn            = "arn:aws:iam::972364552982:role/Administrator"
 
   container_definitions = jsonencode([
     {
