@@ -16,6 +16,8 @@ The project is the following: using github action which will be triggered on cod
 | [helper-script](/helper_script/git_update.sh) | Directory containing the helper script for semantic tagging               |
 | [Test](/Test/)                                | Directory containing docker test files                                    |
 | [Terraform](/Terraform)                       | Directory containing all Terraform automation files for AWS Cloud         |
+| [Version](/VERSION)                           | File dictating the current Version of the Docker image (Gets bumped every successful run [M], [m], [p]) |
+| [Gitignore] (.gitignore)                      | Files that ignores files from commiting to branch/repository              |
 
 ---
 
