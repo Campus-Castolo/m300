@@ -7,6 +7,16 @@ Integrate cross-platform services into a network
 This repo is the project repo for m300 module about integrating cross-platform services to deliever one product.
 The project is the following: using github action which will be triggered on code push on the branch `main` the image will be automatically be build on the ECR and in junction with Terraform immedietly deployed on the AWS cloud with the right configurations. The image which will be used is WordPress, this WordPress instance will be connected with Amazon RDS which will be replicated into another Amazon RDS, these RDS DBs will also be Snapshotted into a Block Storage and all will be monitored and logged by Amazon CloudWatch.
 
+## Projectstructure
+|Directory/File                          | Description                                                                      |
+|-----------------------------------------------|---------------------------------------------------------------------------|
+| [.github/workflows](.github/workflows)        | Directory for GitHub Action Workflow                                      |
+| [.old](.old/)                                 | Old terraform and Workflow Files                                          |
+| [.wp-build](.wp-build/)                       | Directory containing relevant files for customized docker WordPress image |
+| [helper-script](/helper_script/git_update.sh) | Directory containing the helper script for semantic tagging               |
+| [Test](/Test/)                                | Directory containing docker test files                                    |
+| [Terraform](/Terraform)                       | Directory containing all Terraform automation files for AWS Cloud         |
+
 ---
 
 # Repository Navigation
