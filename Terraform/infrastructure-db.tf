@@ -25,6 +25,7 @@ resource "aws_db_instance" "wordpress_db_1" {
   skip_final_snapshot     = true
   publicly_accessible     = false
   multi_az                = false
+  backup_retention_period = 7
 
   tags = {
     Name = "wordpress-db-1-${var.aws_region}"
@@ -47,3 +48,6 @@ resource "aws_db_instance" "wordpress_db_2" {
   }
 }
 
+output "wordpress_db_1_backup_retention" {
+  value = aws_db_instance.wordpress_db_1.backup_retention_period
+}
