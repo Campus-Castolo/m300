@@ -1,9 +1,9 @@
-# Ignore Terraform files
-.terraform/
-
-# Optional: Ignore Terraform state files and logs (recommended)
+# Ignore Terraform state files, logs and secrets
 *.tfstate
 *.tfstate.backup
+*.backup
 .terraform/
+.hcl
 crash.log
 terraform.tfplan
+*.tfvars
