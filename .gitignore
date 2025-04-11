@@ -7,3 +7,4 @@
 crash.log
 terraform.tfplan
 *.tfvars
+*.lock.info
