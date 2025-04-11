@@ -1,3 +1,7 @@
+locals {
+  alb_arn_suffix = element(split("/", aws_lb.ecs_alb.arn), 1)
+}
+
 # CloudWatch Log Group for ECS Task Logging
 resource "aws_cloudwatch_log_group" "ecs_logs" {
   name              = "/ecs/wordpress"
@@ -18,10 +22,13 @@ resource "aws_cloudwatch_dashboard" "main" {
         "x": 0, "y": 0, "width": 12, "height": 6,
         "properties": {
           "metrics": [
-            [ "AWS/ECS", "CPUUtilization", "ClusterName", "${var.ecs_cluster_name}", "ServiceName", "${var.ecs_service_name}" ],
+            [ "AWS/ECS", "CPUUtilization", "ClusterName", aws_ecs_cluster.wordpress_cluster.name, "ServiceName", aws_ecs_service.wordpress_service.name ],
             [ ".", "MemoryUtilization", ".", ".", ".", "." ]
           ],
-          "title": "ECS CPU & Memory", "region": "${var.aws_region}", "period": 300, "stat": "Average"
+          "title": "ECS CPU & Memory",
+          "region": var.aws_region,
+          "period": 300,
+          "stat": "Average"
         }
       },
       {
@@ -29,10 +36,13 @@ resource "aws_cloudwatch_dashboard" "main" {
         "x": 12, "y": 0, "width": 12, "height": 6,
         "properties": {
           "metrics": [
-            [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${var.alb_arn_suffix}" ],
+            [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", local.alb_arn_suffix ],
             [ ".", "HTTPCode_Target_5XX_Count", ".", "." ]
           ],
-          "title": "ALB Requests & Errors", "region": "${var.aws_region}", "period": 300, "stat": "Sum"
+          "title": "ALB Requests & Errors",
+          "region": var.aws_region,
+          "period": 300,
+          "stat": "Sum"
         }
       },
       {
@@ -40,10 +50,13 @@ resource "aws_cloudwatch_dashboard" "main" {
         "x": 0, "y": 6, "width": 12, "height": 6,
         "properties": {
           "metrics": [
-            [ "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "${var.db_instance_identifier}" ],
+            [ "AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", aws_db_instance.wordpress_db_1.id ],
             [ ".", "FreeStorageSpace", ".", "." ]
           ],
-          "title": "RDS CPU & Free Storage", "region": "${var.aws_region}", "period": 300, "stat": "Average"
+          "title": "RDS CPU & Free Storage",
+          "region": var.aws_region,
+          "period": 300,
+          "stat": "Average"
         }
       }
     ]
@@ -61,8 +74,8 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_high" {
   threshold           = 70
   alarm_description   = "High ECS CPU usage."
   dimensions = {
-    ClusterName = var.ecs_cluster_name
-    ServiceName = var.ecs_service_name
+    ClusterName = aws_ecs_cluster.wordpress_cluster.name
+    ServiceName = aws_ecs_service.wordpress_service.name
   }
 }
 
@@ -77,7 +90,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx_errors" {
   threshold           = 5
   alarm_description   = "ALB 5xx error rate is too high."
   dimensions = {
-    LoadBalancer = var.alb_arn_suffix
+    LoadBalancer = local.alb_arn_suffix
   }
 }
 
@@ -92,6 +105,6 @@ resource "aws_cloudwatch_metric_alarm" "rds_low_storage" {
   threshold           = 5000000000
   alarm_description   = "RDS has less than 5GB of free storage."
   dimensions = {
-    DBInstanceIdentifier = var.db_instance_identifier
+    DBInstanceIdentifier = aws_db_instance.wordpress_db_1.id
   }
 }

@@ -63,12 +63,11 @@ resource "aws_ecs_service" "wordpress_service" {
   launch_type     = "FARGATE"
   health_check_grace_period_seconds = 60
 
-network_configuration {
-  subnets         = [aws_subnet.public_1.id, aws_subnet.public_2.id]
-  security_groups = [aws_security_group.security_group-ecs-wordpress.id]
-  assign_public_ip = true
-}
-
+  network_configuration {
+    subnets         = [aws_subnet.public_1.id, aws_subnet.public_2.id]
+    security_groups = [aws_security_group.security_group-ecs-wordpress.id]
+    assign_public_ip = true
+  }
 
   load_balancer {
     target_group_arn = aws_lb_target_group.ecs_tg.arn

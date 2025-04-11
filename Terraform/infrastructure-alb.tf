@@ -48,3 +48,8 @@ output "alb_dns_name" {
   description = "Public DNS name of the Application Load Balancer."
   value       = aws_lb.ecs_alb.dns_name
 }
+
+output "alb_arn_suffix" {
+  description = "ARN suffix for CloudWatch ALB metrics"
+  value       = element(split("/", aws_lb.ecs_alb.arn), 1)
+}
