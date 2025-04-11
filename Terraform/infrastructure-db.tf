@@ -19,8 +19,9 @@ resource "aws_db_instance" "wordpress_db_1" {
   instance_class          = "db.t3.micro"
   username                = var.db_username
   password                = var.db_password
+  db_name                 = "wordpressdb1" # ✅ THIS IS THE MISSING PART
   db_subnet_group_name    = aws_db_subnet_group.wordpress_db_subnet_group.name
-  vpc_security_group_ids = [aws_security_group.security_group-db.id]
+  vpc_security_group_ids  = [aws_security_group.security_group-db.id]
   availability_zone       = aws_subnet.private_1.availability_zone
   skip_final_snapshot     = true
   publicly_accessible     = false

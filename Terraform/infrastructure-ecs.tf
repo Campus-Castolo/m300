@@ -39,7 +39,7 @@ resource "aws_ecs_task_definition" "wordpress_task" {
         },
         {
           name  = "WORDPRESS_DB_NAME"
-          value = "var.db_username"
+          value = "wordpressdb1"
         }
       ],
       log_configuration = {
