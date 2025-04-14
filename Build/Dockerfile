@@ -2,8 +2,8 @@
 
 FROM wordpress:latest
 
-COPY plugins/ /var/www/html/wp-content/plugins/
-COPY themes/ /var/www/html/wp-content/themes/
+COPY ./Build/plugins/ /var/www/html/wp-content/plugins/
+COPY ./Build/themes/ /var/www/html/wp-content/themes/
 
 RUN echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/uploads.ini \
     && echo "post_max_size=64M" >> /usr/local/etc/php/conf.d/uploads.ini
