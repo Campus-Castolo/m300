@@ -2,9 +2,24 @@
 *.tfstate
 *.tfstate.backup
 *.backup
-.terraform/
-*.hcl
-crash.log
 terraform.tfplan
 *.tfvars
 *.lock.info
+*.lock.hcl
+crash.log
+
+# Ignore Terraform working directory
+.terraform/
+
+# Ignore local build artifacts for Lambda
+lambda.zip
+
+# Optional: Ignore Python __pycache__ and compiled files
+__pycache__/
+*.pyc
+
+# Optional: Editor files
+.vscode/
+.idea/
+.DS_Store
+*.swp

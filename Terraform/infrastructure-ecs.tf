@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "wordpress_task" {
         },
         {
           name  = "WORDPRESS_DB_USER"
-          value = "admin"
+          value = var.db_username
         },
         {
           name  = "WORDPRESS_DB_PASSWORD"
@@ -85,4 +85,8 @@ resource "aws_ecs_service" "wordpress_service" {
   depends_on = [
     aws_lb_listener.ecs_listener
   ]
+}
+
+output "debug_db_host" {
+  value = aws_db_instance.wordpress_db_1.address
 }
