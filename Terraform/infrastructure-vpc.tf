@@ -1,3 +1,4 @@
+
 resource "aws_vpc" "m300_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
@@ -7,7 +8,20 @@ resource "aws_vpc" "m300_vpc" {
   }
 }
 
-# Create Internet Gateway for Public Subnets
+# CloudWatch Log Group for VPC Flow Logs
+resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+  name              = "/aws/vpc/flow-logs"
+  retention_in_days = 14
+}
+
+# VPC Flow Logs
+resource "aws_flow_log" "vpc_logs" {
+  vpc_id              = aws_vpc.m300_vpc.id
+  traffic_type        = "ALL"
+  log_destination     = aws_cloudwatch_log_group.vpc_flow_logs.arn
+  log_destination_type = "cloud-watch-logs"
+}
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.m300_vpc.id
   tags = {
@@ -15,11 +29,11 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-# Public Subnets (2x)
+# Public Subnets
 resource "aws_subnet" "public_1" {
-  vpc_id            = aws_vpc.m300_vpc.id
-  cidr_block        = "10.0.1.0/24"
-  availability_zone = "eu-central-1a"
+  vpc_id                  = aws_vpc.m300_vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "eu-central-1a"
   map_public_ip_on_launch = true
   tags = {
     Name = "M300-Public-1"
@@ -27,16 +41,16 @@ resource "aws_subnet" "public_1" {
 }
 
 resource "aws_subnet" "public_2" {
-  vpc_id            = aws_vpc.m300_vpc.id
-  cidr_block        = "10.0.2.0/24"
-  availability_zone = "eu-central-1b"
+  vpc_id                  = aws_vpc.m300_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "eu-central-1b"
   map_public_ip_on_launch = true
   tags = {
     Name = "M300-Public-2"
   }
 }
 
-# Private Subnets (2x)
+# Private Subnets
 resource "aws_subnet" "private_1" {
   vpc_id            = aws_vpc.m300_vpc.id
   cidr_block        = "10.0.3.0/24"
@@ -69,7 +83,6 @@ resource "aws_route" "public_internet_access" {
   gateway_id             = aws_internet_gateway.igw.id
 }
 
-# Associate Public Subnets with Public Route Table
 resource "aws_route_table_association" "public_1_assoc" {
   subnet_id      = aws_subnet.public_1.id
   route_table_id = aws_route_table.public_rt.id
@@ -80,7 +93,7 @@ resource "aws_route_table_association" "public_2_assoc" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-# Private Route Table (optional: separate from public)
+# Private Route Table
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.m300_vpc.id
   tags = {
@@ -88,7 +101,6 @@ resource "aws_route_table" "private_rt" {
   }
 }
 
-# Associate Private Subnets with Private Route Table
 resource "aws_route_table_association" "private_1_assoc" {
   subnet_id      = aws_subnet.private_1.id
   route_table_id = aws_route_table.private_rt.id
