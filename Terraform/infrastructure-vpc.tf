@@ -1,3 +1,4 @@
+# ✅ M300 VPC Setup with Referenced VPC Flow Logs (from infrastructure-sec.tf)
 
 resource "aws_vpc" "m300_vpc" {
   cidr_block           = "10.0.0.0/16"
@@ -8,20 +9,16 @@ resource "aws_vpc" "m300_vpc" {
   }
 }
 
-# CloudWatch Log Group for VPC Flow Logs
-resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
-  name              = "/aws/vpc/flow-logs"
-  retention_in_days = 14
-}
-
-# VPC Flow Logs
+# VPC Flow Log Resource (no duplicates, uses existing resources from infrastructure-sec.tf)
 resource "aws_flow_log" "vpc_logs" {
-  vpc_id              = aws_vpc.m300_vpc.id
-  traffic_type        = "ALL"
-  log_destination     = aws_cloudwatch_log_group.vpc_flow_logs.arn
+  vpc_id               = aws_vpc.m300_vpc.id
+  traffic_type         = "ALL"
   log_destination_type = "cloud-watch-logs"
+  log_group_name       = aws_cloudwatch_log_group.vpc_flow_logs.name
+  iam_role_arn         = aws_iam_role.vpc_flow_logs.arn
 }
 
+# Internet Gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.m300_vpc.id
   tags = {
@@ -69,7 +66,7 @@ resource "aws_subnet" "private_2" {
   }
 }
 
-# Public Route Table
+# Public Route Table & Associations
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.m300_vpc.id
   tags = {
@@ -93,7 +90,7 @@ resource "aws_route_table_association" "public_2_assoc" {
   route_table_id = aws_route_table.public_rt.id
 }
 
-# Private Route Table
+# Private Route Table & Associations
 resource "aws_route_table" "private_rt" {
   vpc_id = aws_vpc.m300_vpc.id
   tags = {
