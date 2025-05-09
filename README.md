@@ -11,10 +11,8 @@ The project is the following: using github action which will be triggered on cod
 |Directory/File                          | Description                                                                      |
 |-----------------------------------------------|---------------------------------------------------------------------------|
 | [.github/workflows](.github/workflows)        | Directory for GitHub Action Workflow                                      |
-| [.old](.old/)                                 | Old terraform and Workflow Files                                          |
 | [Build](Build/)                       | Directory containing relevant files for customized docker WordPress image |
 | [helper-script](/helper_script/git_update.sh) | Directory containing the helper script for semantic tagging               |
-| [Test](/Test/)                                | Directory containing docker test files                                    |
 | [Terraform](/Terraform)                       | Directory containing all Terraform automation files for AWS Cloud         |
 | [Version](/VERSION)                           | File dictating the current Version of the Docker image (Gets bumped every successful run [M], [m], [p]) |
 | [Gitignore](/.gitignore)                      | Files that ignores files from commiting to branch/repository              |
